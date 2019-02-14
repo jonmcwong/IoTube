@@ -4,7 +4,7 @@ bus=smbus.SMBus(1)
 while True:
 	emptylist=[]
 	bus.write_i2c_block_data(0x5b,0xf4,emptylist)
-	drivemode=[16]
+	drivemode=[32]
 	bus.write_i2c_block_data(0x5b,0x05,drivemode)
 	bus.read_i2c_block_data(0x5b,0x02,1)
 	output = bus.read_i2c_block_data(0x5b,0x02,4)

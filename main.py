@@ -12,11 +12,12 @@ import os
 from pprint import pprint
 
 #constants
-ID = 1354
+ID = 243
 SAMPLING_PERIOD = 1   #seconds
 STATIONARY_PERIOD = 10  #seconds
 MSG_POLL_PERIOD = 0.1 #seconds
-HOST = "ee-estott-octo.ee.ic.ac.uk"
+#HOST = "ee-estott-octo.ee.ic.ac.uk"
+HOST = "broker.hivemq.com"
 PORT = 1883
 #callbacks
 def on_connect_cb(client, userdata, flags, rc):
@@ -39,9 +40,10 @@ def on_message_cb(client, userdata, message):  #message.payload is json
   time = payload_json['time']
   print("got here 3")
   #data = fetch_relevant_data(time) #returns dict
+  data = collect_data()
   print("got here 2")
-  data = {}
-  data['test'] = "hello"
+  #data = {}
+  #data['test'] = "hello"
   print("got here 6")
   data.update(payload_json)
   print("got here 5")
@@ -87,7 +89,7 @@ def setup_mqtt(client, ID):
 def publish(json_str):  #sending message to broker
   #json_str must be stringified
   print("Publishing \"" + json.dumps(json_str) + "\"...")
-  device_topic = "IC.embedded/We.OG/" + str(ID) + "p"
+  device_topic = "IC.embedded/We.OG/return"
   print("got to publish")
   MSG_INFO = client.publish(topic=device_topic, payload=json_str, qos=2)
   mqtt.error_string(MSG_INFO.rc)

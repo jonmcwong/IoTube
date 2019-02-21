@@ -1,0 +1,1 @@
+[{"time": [2019, 2, 21, 16, 55, 13, 3, 52, 0], "humidity": 72.001953125, "CO2": 400, "temperature": 0.0, "VolatileComponents": 0}]

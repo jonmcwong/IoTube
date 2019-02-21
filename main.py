@@ -7,7 +7,7 @@
 import paho.mqtt.client as mqtt
 import time
 import json
-from SensorData  import collect_data
+from SensorData  import collect_data  #Ivaxi sensor function
 import os
 from pprint import pprint
 
@@ -15,10 +15,13 @@ from pprint import pprint
 ID = 243
 SAMPLING_PERIOD = 1   #seconds
 STATIONARY_PERIOD = 10  #seconds
-MSG_POLL_PERIOD = 0.1 #seconds
+MSG_POLL_PERIOD = 0.0 #seconds
 #HOST = "ee-estott-octo.ee.ic.ac.uk"
+#HOST = "test.mosquitto.org"
 HOST = "broker.hivemq.com"
 PORT = 1883
+TOPIC = "IC.embedded/We.OG/request/#" # + str(ID)
+#-----------------------------------------------------------------------------------------------------------------
 #callbacks
 def on_connect_cb(client, userdata, flags, rc):
   if rc != 0:
@@ -27,33 +30,25 @@ def on_connect_cb(client, userdata, flags, rc):
     print("Connection successful")
     #subscribing to specific topic to receive messages
     print("Subscribing...")
-    device_topic = "IC.embedded/We.OG/" + str(ID)
+    device_topic = TOPIC
     client.subscribe(topic=device_topic, qos=2)
 
 def on_message_cb(client, userdata, message):  #message.payload is json
   print("Received message '" + str(message.payload) + "' on topic '" + message.topic + "' with QoS " + str(message.qos))
-  #TODO
-  print("got here 1")
   pprint(message.payload.decode())
   payload_json = json.loads(message.payload.decode())
-  print("got here 4")
   time = payload_json['time']
-  print("got here 3")
   #data = fetch_relevant_data(time) #returns dict
   data = collect_data()
-  print("got here 2")
   #data = {}
   #data['test'] = "hello"
-  print("got here 6")
   data.update(payload_json)
-  print("got here 5")
   data = json.dumps(data)
   publish(data)
-  print("got to end of on_message")
 
 def on_publish_cb(client, userdata, mid):
   print("Published")
-  
+
 def on_disconnect_cb(client, userdata, rc):
   if rc != 0:
     print("Unexpected disconnection.")
@@ -62,16 +57,9 @@ def on_disconnect_cb(client, userdata, rc):
     print("Disconnected successfully!")
 
 def on_subscribe_cb(client, userdata, mid, granted_qos):
-  print("Subscibed, will start receiving messages") 
+  print("Subscibed, will start receiving messages")
 #-------------------------------------------------------------------
 
-
-def wait_for_response(client, flag):
-  start_time = time.time()
-  while not flag:
-    print("flag is " + str(flag))
-    client.loop()                      #waits for result, blocking
-  print("Completed in " + str(time.time() - start_time) + " seconds")
 
 def setup_mqtt(client, ID):
   client.on_connect = on_connect_cb
@@ -79,12 +67,11 @@ def setup_mqtt(client, ID):
   client.on_publish = on_publish_cb
   client.on_disconnect = on_disconnect_cb  #this call back causes errors
   client.on_subscribe = on_subscribe_cb
-
   #connecting to client
   print("Trying to connect...")
   #client.tls_set(ca_certs="mosquitto.org.crt", certfile="client.crt",keyfile="client.key")
   client.connect(host=HOST,port=PORT)
-    #client.connect(host="test.mosquitto.org",port=1883)
+  #client.connect(host="test.mosquitto.org",port=1883)
 
 def publish(json_str):  #sending message to broker
   #json_str must be stringified
